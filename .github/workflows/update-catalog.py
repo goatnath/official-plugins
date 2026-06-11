@@ -11,6 +11,8 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[2]
 CATALOG_PATH = ROOT_DIR / "catalog.toml"
 REQUIRED_FIELDS = ("id", "name", "version", "author", "min_noctalia", "tags")
+OPTIONAL_STRING_FIELDS = ("license", "icon", "description")
+OPTIONAL_BOOL_FIELDS = ("deprecated",)
 
 
 def load_plugin_manifest(path: Path) -> dict:
@@ -27,7 +29,18 @@ def load_plugin_manifest(path: Path) -> dict:
     ):
         raise ValueError(f"{path.relative_to(ROOT_DIR)} has invalid tags; expected strings")
 
-    return {field: manifest[field] for field in REQUIRED_FIELDS}
+    out = {field: manifest[field] for field in REQUIRED_FIELDS}
+    for field in OPTIONAL_STRING_FIELDS:
+        if field in manifest:
+            if not isinstance(manifest[field], str):
+                raise ValueError(f"{path.relative_to(ROOT_DIR)} has invalid {field}; expected string")
+            out[field] = manifest[field]
+    for field in OPTIONAL_BOOL_FIELDS:
+        if field in manifest:
+            if not isinstance(manifest[field], bool):
+                raise ValueError(f"{path.relative_to(ROOT_DIR)} has invalid {field}; expected bool")
+            out[field] = manifest[field]
+    return out
 
 
 def existing_catalog_order() -> dict[str, int]:
@@ -58,6 +71,10 @@ def toml_string(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def toml_bool(value: bool) -> str:
+    return "true" if value else "false"
+
+
 def render_catalog(plugins: list[dict]) -> str:
     lines = [
         "# Official Noctalia plugins catalog.",
@@ -78,6 +95,18 @@ def render_catalog(plugins: list[dict]) -> str:
                 f"name = {toml_string(plugin['name'])}",
                 f"version = {toml_string(plugin['version'])}",
                 f"author = {toml_string(plugin['author'])}",
+            ]
+        )
+        if "license" in plugin:
+            lines.append(f"license = {toml_string(plugin['license'])}")
+        if "icon" in plugin:
+            lines.append(f"icon = {toml_string(plugin['icon'])}")
+        if "description" in plugin:
+            lines.append(f"description = {toml_string(plugin['description'])}")
+        if "deprecated" in plugin:
+            lines.append(f"deprecated = {toml_bool(plugin['deprecated'])}")
+        lines.extend(
+            [
                 f"min_noctalia = {toml_string(plugin['min_noctalia'])}",
                 "tags = ["
                 + ", ".join(toml_string(tag) for tag in plugin["tags"])
