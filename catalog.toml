@@ -46,3 +46,14 @@ icon = "language"
 description = "Translate text from the launcher via Google Translate. Type `/tr <lang> <text>`."
 min_noctalia = "5.0.0"
 tags = ["translate", "language", "launcher"]
+
+[[plugin]]
+id = "noctalia/timer"
+name = "Timer"
+version = "1.0.0"
+author = "noctalia"
+license = "MIT"
+icon = "clock"
+description = "A countdown timer desktop widget with start/pause and reset."
+min_noctalia = "5.0.0"
+tags = ["timer", "countdown", "desktop"]
