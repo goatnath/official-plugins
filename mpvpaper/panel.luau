@@ -16,7 +16,7 @@ local CACHE_DIR = (noctalia.getenv("XDG_CACHE_HOME") or (noctalia.getenv("HOME")
 local videos = {}      -- { { path=, name=, ext= }, ... }
 local page = 1
 local outputsList = {}
-local selectedIndex = 0 -- 0 = all outputs, else outputsList[selectedIndex]
+local selectedConnectorName = "" -- empty = all outputs
 local available = true
 local errorMessage = ""
 local cmdNonce = 0
@@ -65,8 +65,10 @@ local function assignmentFor(connector)
 end
 
 local function selectedConnector()
-  local output = outputsList[selectedIndex]
-  return output and output.name or nil
+  if selectedConnectorName == "" then
+    return nil
+  end
+  return selectedConnectorName
 end
 
 local function sendCommand(action, connector, path)
@@ -75,29 +77,23 @@ local function sendCommand(action, connector, path)
 end
 
 local function applyVideo(path)
-  if selectedIndex == 0 then
+  if selectedConnectorName == "" then
     for _, output in ipairs(outputsList) do
       sendCommand("set", output.name, path)
     end
   else
-    local connector = selectedConnector()
-    if connector then
-      sendCommand("set", connector, path)
-    end
+    sendCommand("set", selectedConnectorName, path)
   end
   render()
 end
 
 local function stopSelected()
-  if selectedIndex == 0 then
+  if selectedConnectorName == "" then
     for _, output in ipairs(outputsList) do
       sendCommand("clear", output.name, nil)
     end
   else
-    local connector = selectedConnector()
-    if connector then
-      sendCommand("clear", connector, nil)
-    end
+    sendCommand("clear", selectedConnectorName, nil)
   end
   render()
 end
@@ -179,8 +175,14 @@ end
 
 local function refreshOutputs()
   outputsList = noctalia.outputs() or {}
-  if selectedIndex > #outputsList then
-    selectedIndex = 0
+  if selectedConnectorName ~= "" then
+    for _, output in ipairs(outputsList) do
+      if output.name == selectedConnectorName then
+        return
+      end
+    end
+    noctalia.log("mpvpaper: selected output is no longer available: " .. selectedConnectorName)
+    selectedConnectorName = ""
   end
 end
 
@@ -198,6 +200,18 @@ local function outputOptions()
   return options
 end
 
+local function selectedOutputIndex()
+  if selectedConnectorName == "" then
+    return 0
+  end
+  for i, output in ipairs(outputsList) do
+    if output.name == selectedConnectorName then
+      return i
+    end
+  end
+  return 0
+end
+
 local function columnWidth()
   return math.floor(((PANEL_WIDTH - PANEL_PADDING) - COLUMN_GAP * (COLUMNS - 1)) / COLUMNS)
 end
@@ -208,7 +222,7 @@ local function tileSize()
 end
 
 local function isAssignedToSelection(path)
-  if selectedIndex == 0 then
+  if selectedConnectorName == "" then
     for _, output in ipairs(outputsList) do
       if assignmentFor(output.name) == path then
         return true
@@ -287,6 +301,9 @@ end
 render = function()
   pickSlots = {}
   refreshAvailability()
+  refreshOutputs()
+  local options = outputOptions()
+  local selectedIndex = selectedOutputIndex()
 
   if not available then
     panel.render(ui.column({ flexGrow = 1, gap = 12, align = "center", justify = "center" }, {
@@ -306,7 +323,7 @@ render = function()
       ui.label({ text = tr("output"), fontSize = 12, color = "on_surface_variant" }),
       ui.select({
         key = "output",
-        options = outputOptions(),
+        options = options,
         selectedIndex = selectedIndex,
         onChange = "onOutputChange",
         flexGrow = 1,
@@ -334,8 +351,20 @@ function onOpen(_context)
   render()
 end
 
-function onOutputChange(index)
-  selectedIndex = tonumber(index) or 0
+function onOutputChange(index, label)
+  local optionIndex = tonumber(index)
+  if optionIndex == nil then
+    noctalia.log("mpvpaper: invalid output selection index: " .. tostring(index))
+    return
+  end
+  if optionIndex == 0 then
+    selectedConnectorName = ""
+  elseif type(label) == "string" and label ~= "" then
+    selectedConnectorName = label
+  else
+    noctalia.log("mpvpaper: invalid output selection label: " .. tostring(label))
+    return
+  end
   render()
 end
 
