@@ -12,7 +12,7 @@ function update()
 end
 
 function onClick()
-  noctalia.runAsync("noctalia msg panel-toggle noctalia/wallhaven:browser")
+  noctalia.togglePanel("noctalia/wallhaven:browser")
 end
 
 render()

@@ -12,7 +12,7 @@ function update()
 end
 
 function onClick()
-  noctalia.runAsync("noctalia msg panel-toggle noctalia/mpvpaper:picker")
+  noctalia.togglePanel("noctalia/mpvpaper:picker")
 end
 
 render()

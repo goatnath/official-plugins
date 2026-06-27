@@ -1,9 +1,10 @@
 -- Wallhaven wallpaper browser panel.
 --
 -- Browse search results with category and purity filters and pagination, download the full
--- image into the configured wallpaper directory, then apply it via host IPC.
+-- image into the configured wallpaper directory, then apply it via noctalia.setWallpaper.
 
 local API_BASE = "https://wallhaven.cc/api/v1"
+local CACHE_DIR = (noctalia.getenv("XDG_STATE_HOME") or (noctalia.getenv("HOME") .. "/.local/state")) .. "/noctalia/wallhaven/thumbs"
 local PANEL_WIDTH = 920
 local PANEL_PADDING = 28 -- Style::panelPadding * 2 on the host surface
 local COLUMNS = 4
@@ -33,7 +34,7 @@ local categoryGeneral = true
 local categoryAnime = true
 local categoryPeople = true
 
-local thumbPaths = {} -- id -> relative cache path
+local thumbPaths = {} -- id -> cache file path
 local thumbPending = {} -- id -> true while downloading
 local thumbQueue = {} -- wallpapers waiting for a download slot
 local thumbActive = 0
@@ -180,12 +181,11 @@ local function httpHeaders()
 end
 
 local function ensureCacheDir(done)
-  local cacheDir = noctalia.expandPath(noctalia.pluginDir()) .. "/cache/thumbs"
-  noctalia.runAsync(`mkdir -p {shellQuote(cacheDir)}`, done)
+  noctalia.runAsync(`mkdir -p {shellQuote(CACHE_DIR)}`, done)
 end
 
 local function thumbCachePath(id)
-  return `cache/thumbs/{id}.jpg`
+  return `{CACHE_DIR}/{id}.jpg`
 end
 
 local function columnWidth()
@@ -301,15 +301,10 @@ applyWallpaper = function(id)
         return
       end
 
-      noctalia.runAsync(`noctalia msg wallpaper-set {shellQuote(dest)}`, function(setRes)
-        applying = false
-        if setRes and setRes.exitCode == 0 and setRes.stdout and setRes.stdout:find("ok", 1, true) then
-          noctalia.notify(tr("title"), tr("applied"))
-        else
-          noctalia.notifyError(tr("title"), tr("apply_failed"))
-        end
-        render()
-      end)
+      noctalia.setWallpaper(dest)
+      applying = false
+      noctalia.notify(tr("title"), tr("applied"))
+      render()
     end)
   end)
 end

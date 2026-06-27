@@ -29,10 +29,10 @@ Browse [Wallhaven](https://wallhaven.cc), download a wallpaper into your Noctali
 | `api_key` | `string` | *(empty)* | Optional Wallhaven API key for higher rate limits and NSFW access. |
 | `download_dir` | `string` | *(empty)* | Optional download override; defaults to your configured wallpaper directory. |
 
-Thumbnail previews are cached under `cache/thumbs/` in the plugin install directory.
+Thumbnail previews are cached under `$XDG_STATE_HOME/noctalia/wallhaven/thumbs` (`~/.local/state/noctalia/wallhaven/thumbs` by default).
 
 ## Notes
 
 - Requires network access (`[shell].offline_mode` must be off).
 - NSFW results require a Wallhaven API key.
-- Applied wallpapers use `noctalia msg wallpaper-set <path>` so they persist like any other wallpaper.
+- Applied wallpapers use `noctalia.setWallpaper(path)` so they persist like any other wallpaper.
