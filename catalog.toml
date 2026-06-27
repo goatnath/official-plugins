@@ -14,7 +14,7 @@ license = "MIT"
 icon = "puzzle"
 description = "A minimal reference plugin: a bar widget with settings and IPC, a service, a shortcut, a launcher provider with setQuery drill-in, and a panel of interactive controls."
 min_noctalia = "5.0.0"
-tags = ["example", "demo", "launcher", "panel"]
+tags = ["demo"]
 
 [[plugin]]
 id = "noctalia/screen_recorder"
@@ -25,7 +25,7 @@ license = "MIT"
 icon = "video"
 description = "Record the screen with gpu-screen-recorder."
 min_noctalia = "5.0.0"
-tags = ["recording", "screen", "video"]
+tags = ["recording", "video"]
 
 [[plugin]]
 id = "noctalia/bongocat"
@@ -36,7 +36,7 @@ license = "MIT"
 icon = "cat"
 description = "A cat that slaps your bar when you type or to the beat."
 min_noctalia = "5.0.0"
-tags = ["fun", "animation", "cat"]
+tags = ["fun", "animation"]
 
 [[plugin]]
 id = "noctalia/translator"
@@ -47,7 +47,7 @@ license = "MIT"
 icon = "language"
 description = "Translate text from the launcher via Google Translate."
 min_noctalia = "5.0.0"
-tags = ["translate", "language", "launcher"]
+tags = ["language", "launcher"]
 
 [[plugin]]
 id = "noctalia/timer"
@@ -58,7 +58,7 @@ license = "MIT"
 icon = "clock"
 description = "A countdown timer desktop widget with start/pause and reset."
 min_noctalia = "5.0.0"
-tags = ["timer", "countdown", "desktop"]
+tags = ["countdown", "desktop"]
 
 [[plugin]]
 id = "noctalia/wallhaven"
@@ -69,7 +69,7 @@ license = "MIT"
 icon = "photo"
 description = "Browse Wallhaven wallpapers."
 min_noctalia = "5.0.0"
-tags = ["wallpaper", "wallhaven", "panel"]
+tags = ["wallpaper"]
 
 [[plugin]]
 id = "noctalia/mpvpaper"
@@ -80,7 +80,7 @@ license = "MIT"
 icon = "movie"
 description = "Video wallpapers via mpvpaper."
 min_noctalia = "5.0.0"
-tags = ["wallpaper", "video", "mpvpaper"]
+tags = ["wallpaper", "video"]
 
 [[plugin]]
 id = "noctalia/kaomoji"
@@ -91,4 +91,4 @@ license = "MIT"
 icon = "mood-smile"
 description = "Browse and search kaomoji emoticons from the launcher and copy them to the clipboard."
 min_noctalia = "5.0.0"
-tags = ["kaomoji", "emoticon", "launcher", "fun"]
+tags = ["emoticon", "launcher"]
