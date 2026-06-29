@@ -54,8 +54,9 @@ ENTRY_FIELDS = {
     "service": BASE_ENTRY_FIELDS,
     "shortcut": BASE_ENTRY_FIELDS,
     "launcher_provider": BASE_ENTRY_FIELDS
-    | {"prefix", "glyph", "include_in_global_search", "debounce_ms", "setting"},
+    | {"prefix", "glyph", "include_in_global_search", "debounce_ms", "setting", "category"},
 }
+CATEGORY_FIELDS = {"label", "glyph"}
 SETTING_FIELDS = {
     "key",
     "type",
@@ -285,6 +286,39 @@ class Validator:
                     context,
                     "debounce_ms must be a non-negative integer",
                 )
+
+        if "category" in entry:
+            self.validate_launcher_categories(manifest_path, f"{context}.category", entry["category"])
+
+    def validate_launcher_categories(self, manifest_path: Path, context: str, categories: Any) -> None:
+        if not isinstance(categories, list):
+            self.add_context_error(manifest_path, context, "must be an array of tables")
+            return
+
+        if not categories:
+            self.add_context_error(manifest_path, context, "must not be empty")
+
+        seen_labels: set[str] = set()
+        for index, category in enumerate(categories):
+            category_context = f"{context}[{index}]"
+            if not isinstance(category, dict):
+                self.add_context_error(manifest_path, category_context, "must be a table")
+                continue
+
+            unknown = sorted(set(category) - CATEGORY_FIELDS)
+            for field in unknown:
+                self.add_context_error(manifest_path, category_context, f"unknown field '{field}'")
+
+            label = category.get("label")
+            if not is_non_empty_string(label):
+                self.add_context_error(manifest_path, category_context, "label must be a non-empty string")
+            elif label in seen_labels:
+                self.add_context_error(manifest_path, category_context, f"duplicate category label '{label}'")
+            else:
+                seen_labels.add(label)
+
+            if not is_non_empty_string(category.get("glyph")):
+                self.add_context_error(manifest_path, category_context, "glyph must be a non-empty string")
 
     def validate_panel_fields(self, manifest_path: Path, context: str, entry: dict[str, Any]) -> None:
         for field in ("width", "height"):
